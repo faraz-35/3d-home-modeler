@@ -27,7 +27,7 @@ export const useStore = create<AppState>((set, get) => {
   
   return {
   objects: [],
-  floors: [{ id: crypto.randomUUID(), y: 0, color: '#808080' }],
+  floors: [{ id: crypto.randomUUID(), y: 0, color: '#808080', name: 'Floor 1' }],
   selectedObjectId: null,
   currentFloorIndex: 0,
   sceneBackgroundColor: '#FFFFFF',
@@ -39,7 +39,7 @@ export const useStore = create<AppState>((set, get) => {
     set((state) => {
       const highestFloor = state.floors.reduce((max, f) => f.y > max.y ? f : max, state.floors[0] || { y: -WALL_HEIGHT });
       const newY = highestFloor.y + WALL_HEIGHT + FLOOR_THICKNESS;
-      const newFloor: Floor = { id: crypto.randomUUID(), y: newY, color: '#808080' };
+      const newFloor: Floor = { id: crypto.randomUUID(), y: newY, color: '#808080', name: `Floor ${state.floors.length + 1}` };
       return {
         floors: [...state.floors, newFloor],
         currentFloorIndex: state.floors.length,
@@ -84,9 +84,14 @@ export const useStore = create<AppState>((set, get) => {
       const currentFloor = state.floors[state.currentFloorIndex];
       if (!currentFloor) return state;
 
+      const objectCount = state.objects.filter(o => o.type === type).length;
+      const typeName = type.charAt(0) + type.slice(1).toLowerCase();
+      const newName = `${typeName} ${objectCount + 1}`;
+      
       let newObject: SceneObject;
       const commonProps = {
         id: crypto.randomUUID(),
+        name: newName,
         floorIndex: state.currentFloorIndex,
         position: [0, 0, 0] as [number, number, number],
         rotation: [0, 0, 0] as [number, number, number],

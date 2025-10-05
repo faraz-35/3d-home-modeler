@@ -12,6 +12,7 @@ export enum ObjectType {
 
 export interface SceneObject {
   id: string;
+  name: string;
   type: ObjectType;
   position: [number, number, number];
   rotation: [number, number, number];
@@ -22,6 +23,7 @@ export interface SceneObject {
 
 export interface Floor {
   id:string;
+  name: string;
   y: number;
   color: string;
 }

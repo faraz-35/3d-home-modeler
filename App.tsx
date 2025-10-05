@@ -74,65 +74,91 @@ const SceneBackground: React.FC = () => {
 interface ObjectProps { object: SceneObject; }
 
 const Wall: React.FC<ObjectProps> = ({ object }) => {
-  const { setSelectedObjectId } = useStore();
+  const { setSelectedObjectId, selectedObjectId } = useStore();
+  const isSelected = selectedObjectId === object.id;
   return (
     <Box args={object.size} position={object.position} rotation={object.rotation} userData={{id: object.id}} onClick={(e) => { e.stopPropagation(); setSelectedObjectId(object.id); }}>
-      <meshStandardMaterial color={object.color} />
+      <meshStandardMaterial 
+        color={object.color}
+        emissive={isSelected ? '#44aaff' : '#000000'}
+        emissiveIntensity={isSelected ? 0.5 : 0}
+      />
     </Box>
   );
 };
 
 const Door: React.FC<ObjectProps> = ({ object }) => {
-  const { setSelectedObjectId } = useStore();
+  const { setSelectedObjectId, selectedObjectId } = useStore();
+  const isSelected = selectedObjectId === object.id;
   return (
     <Box args={object.size} position={object.position} rotation={object.rotation} userData={{id: object.id}} onClick={(e) => { e.stopPropagation(); setSelectedObjectId(object.id); }}>
-      <meshStandardMaterial color={object.color} roughness={0.2} metalness={0.1} />
+      <meshStandardMaterial 
+        color={object.color} 
+        roughness={0.2} 
+        metalness={0.1}
+        emissive={isSelected ? '#44aaff' : '#000000'}
+        emissiveIntensity={isSelected ? 0.5 : 0}
+      />
     </Box>
   );
 };
 
 const Window: React.FC<ObjectProps> = ({ object }) => {
-    const { setSelectedObjectId } = useStore();
+    const { setSelectedObjectId, selectedObjectId } = useStore();
+    const isSelected = selectedObjectId === object.id;
     return (
         <Box args={object.size} position={object.position} rotation={object.rotation} userData={{id: object.id}} onClick={(e) => { e.stopPropagation(); setSelectedObjectId(object.id); }}>
-            <meshStandardMaterial color={object.color} transparent opacity={0.5} />
+            <meshStandardMaterial 
+                color={object.color} 
+                transparent opacity={0.5} 
+                emissive={isSelected ? '#44aaff' : '#000000'}
+                emissiveIntensity={isSelected ? 0.7 : 0}
+            />
         </Box>
     );
 };
 
 const Table: React.FC<ObjectProps> = ({ object }) => {
-    const { setSelectedObjectId } = useStore();
+    const { setSelectedObjectId, selectedObjectId } = useStore();
+    const isSelected = selectedObjectId === object.id;
     const { size, color, position, rotation } = object;
     const [width, height, depth] = size;
     const legThickness = Math.min(width, depth) * 0.08;
     const tabletopThickness = 0.05;
     const legHeight = height - tabletopThickness;
+    
+    const materialProps = {
+        color: color,
+        emissive: isSelected ? '#44aaff' : '#000000',
+        emissiveIntensity: isSelected ? 0.5 : 0,
+    };
 
     return (
         <group position={position} rotation={rotation} userData={{id: object.id}} onClick={(e) => { e.stopPropagation(); setSelectedObjectId(object.id); }}>
             {/* Tabletop */}
             <Box args={[width, tabletopThickness, depth]} position={[0, height / 2 - tabletopThickness / 2, 0]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
             {/* Legs */}
             <Box args={[legThickness, legHeight, legThickness]} position={[-width / 2 + legThickness, -tabletopThickness/2, -depth / 2 + legThickness]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
             <Box args={[legThickness, legHeight, legThickness]} position={[width / 2 - legThickness, -tabletopThickness/2, -depth / 2 + legThickness]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
             <Box args={[legThickness, legHeight, legThickness]} position={[-width / 2 + legThickness, -tabletopThickness/2, depth / 2 - legThickness]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
             <Box args={[legThickness, legHeight, legThickness]} position={[width / 2 - legThickness, -tabletopThickness/2, depth / 2 - legThickness]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
         </group>
     );
 };
 
 const Chair: React.FC<ObjectProps> = ({ object }) => {
-    const { setSelectedObjectId } = useStore();
+    const { setSelectedObjectId, selectedObjectId } = useStore();
+    const isSelected = selectedObjectId === object.id;
     const { size, color, position, rotation } = object;
     const [width, height, depth] = size;
     const seatHeight = height * 0.45;
@@ -140,57 +166,71 @@ const Chair: React.FC<ObjectProps> = ({ object }) => {
     const seatThickness = 0.05;
     const backHeight = height - seatHeight;
 
+    const materialProps = {
+        color: color,
+        emissive: isSelected ? '#44aaff' : '#000000',
+        emissiveIntensity: isSelected ? 0.5 : 0,
+    };
+
     return (
         <group position={position} rotation={rotation} userData={{id: object.id}} onClick={(e) => { e.stopPropagation(); setSelectedObjectId(object.id); }}>
             {/* Seat */}
             <Box args={[width, seatThickness, depth]} position={[0, seatHeight/2 - height/2 + seatThickness, 0]}>
-                 <meshStandardMaterial color={color} />
+                 <meshStandardMaterial {...materialProps} />
             </Box>
              {/* Back */}
             <Box args={[width, backHeight, legThickness]} position={[0, seatHeight / 2 - height / 2 + backHeight/2 + seatThickness*2, -depth/2 + legThickness/2]}>
-                 <meshStandardMaterial color={color} />
+                 <meshStandardMaterial {...materialProps} />
             </Box>
             {/* Legs */}
             <Box args={[legThickness, seatHeight, legThickness]} position={[-width/2+legThickness/2, -height/2 + seatHeight/2, -depth/2+legThickness/2]}>
-                 <meshStandardMaterial color={color} />
+                 <meshStandardMaterial {...materialProps} />
             </Box>
             <Box args={[legThickness, seatHeight, legThickness]} position={[width/2-legThickness/2, -height/2 + seatHeight/2, -depth/2+legThickness/2]}>
-                 <meshStandardMaterial color={color} />
+                 <meshStandardMaterial {...materialProps} />
             </Box>
             <Box args={[legThickness, seatHeight, legThickness]} position={[-width/2+legThickness/2, -height/2 + seatHeight/2, depth/2-legThickness/2]}>
-                 <meshStandardMaterial color={color} />
+                 <meshStandardMaterial {...materialProps} />
             </Box>
             <Box args={[legThickness, seatHeight, legThickness]} position={[width/2-legThickness/2, -height/2 + seatHeight/2, depth/2-legThickness/2]}>
-                 <meshStandardMaterial color={color} />
+                 <meshStandardMaterial {...materialProps} />
             </Box>
         </group>
     );
 };
 
 const Bed: React.FC<ObjectProps> = ({ object }) => {
-    const { setSelectedObjectId } = useStore();
+    const { setSelectedObjectId, selectedObjectId } = useStore();
+    const isSelected = selectedObjectId === object.id;
     const { size, color, position, rotation } = object;
     const [width, height, depth] = size;
     const mattressHeight = height * 0.5;
     const headboardHeight = height * 0.8;
     const headboardThickness = 0.1;
 
+    const materialProps = {
+        color: color,
+        emissive: isSelected ? '#44aaff' : '#000000',
+        emissiveIntensity: isSelected ? 0.5 : 0,
+    };
+
     return (
         <group position={position} rotation={rotation} userData={{id: object.id}} onClick={(e) => { e.stopPropagation(); setSelectedObjectId(object.id); }}>
             {/* Mattress */}
             <Box args={[width, mattressHeight, depth]} position={[0, mattressHeight/2 - height/2, 0]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
             {/* Headboard */}
             <Box args={[width, headboardHeight, headboardThickness]} position={[0, headboardHeight/2 - height/2, -depth/2 - headboardThickness/2]}>
-                 <meshStandardMaterial color={color} />
+                 <meshStandardMaterial {...materialProps} />
             </Box>
         </group>
     );
 };
 
 const Sofa: React.FC<ObjectProps> = ({ object }) => {
-    const { setSelectedObjectId } = useStore();
+    const { setSelectedObjectId, selectedObjectId } = useStore();
+    const isSelected = selectedObjectId === object.id;
     const { size, color, position, rotation } = object;
     const [width, height, depth] = size;
     const seatHeight = height * 0.5;
@@ -198,48 +238,61 @@ const Sofa: React.FC<ObjectProps> = ({ object }) => {
     const backHeight = height;
     const thickness = 0.15;
 
+    const materialProps = {
+        color: color,
+        emissive: isSelected ? '#44aaff' : '#000000',
+        emissiveIntensity: isSelected ? 0.5 : 0,
+    };
+
     return (
         <group position={position} rotation={rotation} userData={{id: object.id}} onClick={(e) => { e.stopPropagation(); setSelectedObjectId(object.id); }}>
             {/* Base/Seat */}
             <Box args={[width, seatHeight, depth]} position={[0, seatHeight/2 - height/2, 0]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
             {/* Back */}
             <Box args={[width, backHeight, thickness]} position={[0, backHeight/2 - height/2, -depth/2 + thickness/2]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
             {/* Armrests */}
             <Box args={[thickness, armrestHeight, depth]} position={[-width/2 + thickness/2, armrestHeight/2 - height/2, 0]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
             <Box args={[thickness, armrestHeight, depth]} position={[width/2 - thickness/2, armrestHeight/2 - height/2, 0]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
         </group>
     );
 };
 
 const Shelf: React.FC<ObjectProps> = ({ object }) => {
-    const { setSelectedObjectId } = useStore();
+    const { setSelectedObjectId, selectedObjectId } = useStore();
+    const isSelected = selectedObjectId === object.id;
     const { size, color, position, rotation } = object;
     const [width, height, depth] = size;
     const numShelves = 5;
     const shelfThickness = 0.04;
     const supportThickness = 0.04;
 
+    const materialProps = {
+        color: color,
+        emissive: isSelected ? '#44aaff' : '#000000',
+        emissiveIntensity: isSelected ? 0.5 : 0,
+    };
+
     return (
         <group position={position} rotation={rotation} userData={{id: object.id}} onClick={(e) => { e.stopPropagation(); setSelectedObjectId(object.id); }}>
             {/* Supports */}
             <Box args={[supportThickness, height, depth]} position={[-width/2 + supportThickness/2, 0, 0]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
             <Box args={[supportThickness, height, depth]} position={[width/2 - supportThickness/2, 0, 0]}>
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial {...materialProps} />
             </Box>
             {/* Shelves */}
             {Array.from({ length: numShelves }).map((_, i) => (
                 <Box key={i} args={[width - supportThickness*2, shelfThickness, depth]} position={[0, -height/2 + (i * height/(numShelves-1)) - shelfThickness/2, 0]}>
-                    <meshStandardMaterial color={color} />
+                    <meshStandardMaterial {...materialProps} />
                 </Box>
             ))}
         </group>
@@ -249,10 +302,15 @@ const Shelf: React.FC<ObjectProps> = ({ object }) => {
 interface FloorPlaneProps { floorData: Floor; }
 
 const FloorPlane: React.FC<FloorPlaneProps> = ({ floorData }) => {
-    const { setSelectedObjectId } = useStore();
+    const { setSelectedObjectId, selectedObjectId } = useStore();
+    const isSelected = selectedObjectId === floorData.id;
     return (
         <Plane args={[35, 70]} rotation={[-Math.PI / 2, 0, 0]} position={[0, floorData.y - 0.05, 0]} userData={{id: floorData.id}} onClick={(e) => { e.stopPropagation(); setSelectedObjectId(floorData.id); }}>
-            <meshStandardMaterial color={floorData.color} />
+            <meshStandardMaterial 
+                color={floorData.color} 
+                emissive={isSelected ? '#44aaff' : '#000000'}
+                emissiveIntensity={isSelected ? 0.3 : 0}
+            />
         </Plane>
     );
 };
@@ -263,6 +321,13 @@ const PropertyInput: React.FC<{ label: string; value: number; onChange: (val: nu
     <div className="flex items-center justify-between text-sm">
         <label className="text-gray-400 w-24 truncate" title={label}>{label}</label>
         <input type="number" value={Number.isInteger(value) ? value : value.toFixed(2)} step={step} onChange={(e) => onChange(parseFloat(e.target.value) || 0)} className="w-36 bg-gray-700 border border-gray-600 rounded-md px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" />
+    </div>
+);
+
+const NameInput: React.FC<{ label: string; value: string; onChange: (val: string) => void; }> = ({ label, value, onChange }) => (
+    <div className="flex items-center justify-between text-sm">
+        <label className="text-gray-400 w-24">{label}</label>
+        <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="w-36 bg-gray-700 border border-gray-600 rounded-md px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" />
     </div>
 );
 
@@ -293,7 +358,11 @@ const PropertiesPanelContent: React.FC = () => {
   if (selectedFloor) {
     return (
         <div className="space-y-4 p-4">
-            <h3 className="text-lg font-bold text-white border-b border-gray-700 pb-3 mb-4">Floor Properties</h3>
+            <div className="border-b border-gray-700 pb-3 mb-4">
+                <h3 className="text-lg font-bold text-white">{selectedFloor.name}</h3>
+                <p className="text-sm text-gray-400">Floor Properties</p>
+            </div>
+            <NameInput label="Name" value={selectedFloor.name} onChange={(val) => updateFloor(selectedFloor.id, { name: val })} />
             <PropertyInput label="Height (Y)" value={selectedFloor.y} onChange={(val) => updateFloor(selectedFloor.id, { y: val })}/>
             <ColorInput label="Color" value={selectedFloor.color} onChange={(val) => updateFloor(selectedFloor.id, { color: val })}/>
         </div>
@@ -319,7 +388,11 @@ const PropertiesPanelContent: React.FC = () => {
 
     return (
       <div className="space-y-3 p-4">
-        <h3 className="text-lg font-bold text-white border-b border-gray-700 pb-3 mb-4 capitalize">{selectedObject.type.toLowerCase()} Properties</h3>
+        <div className="border-b border-gray-700 pb-3 mb-4">
+            <h3 className="text-lg font-bold text-white">{selectedObject.name}</h3>
+            <p className="text-sm text-gray-400 capitalize">{selectedObject.type.toLowerCase()} Properties</p>
+        </div>
+        <NameInput label="Name" value={selectedObject.name} onChange={(val) => updateObject(selectedObject.id, { name: val })} />
         <div className="space-y-3"><h4 className="text-md font-semibold text-gray-300 pt-2">Position</h4>
             <PropertyInput label="X" value={selectedObject.position[0]} onChange={(val) => updateObject(selectedObject.id, { position: [val, selectedObject.position[1], selectedObject.position[2]] })} />
             <PropertyInput label="Y" value={selectedObject.position[1]} onChange={(val) => updateObject(selectedObject.id, { position: [selectedObject.position[0], val, selectedObject.position[2]] })} />
@@ -437,7 +510,7 @@ const ItemsPanel: React.FC<{ onFileLoad: (e: React.ChangeEvent<HTMLInputElement>
                 <Section title="Floors">
                      <div className="flex gap-3 items-center">
                         <select value={currentFloorIndex} onChange={(e) => setCurrentFloorIndex(parseInt(e.target.value))} className="flex-grow bg-gray-700 border border-gray-600 rounded-md px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                          {floors.map((_, index) => ( <option key={index} value={index}>Floor {index + 1}</option>))}
+                          {floors.map((floor, index) => ( <option key={index} value={index}>{floor.name}</option>))}
                         </select>
                         <IconButton onClick={addFloor} label="Add"><AddFloorIcon /></IconButton>
                         <IconButton onClick={handleDeleteFloor} label="Delete" isDisabled={floors.length <= 1}><DeleteIcon /></IconButton>
@@ -453,12 +526,12 @@ const ItemsPanel: React.FC<{ onFileLoad: (e: React.ChangeEvent<HTMLInputElement>
                     {currentFloor ? (
                         <>
                             <div onClick={() => setSelectedObjectId(currentFloor.id)} className={`p-2.5 rounded-md cursor-pointer transition-colors text-sm ${selectedObjectId === currentFloor.id ? 'bg-blue-600 font-semibold' : 'hover:bg-gray-800'}`}>
-                                Floor {currentFloorIndex + 1}
+                                {currentFloor.name}
                             </div>
                             <div className="pl-4 pt-1 space-y-1 border-l-2 border-gray-700 ml-2">
                                 {currentFloorObjects.length > 0 ? currentFloorObjects.map(obj => (
-                                    <div key={obj.id} onClick={(e) => { e.stopPropagation(); setSelectedObjectId(obj.id); }} className={`p-2.5 text-sm rounded-md cursor-pointer transition-colors capitalize ${selectedObjectId === obj.id ? 'bg-blue-600 font-semibold' : 'hover:bg-gray-800'}`}>
-                                        {obj.type.toLowerCase()}
+                                    <div key={obj.id} onClick={(e) => { e.stopPropagation(); setSelectedObjectId(obj.id); }} className={`p-2.5 text-sm rounded-md cursor-pointer transition-colors ${selectedObjectId === obj.id ? 'bg-blue-600 font-semibold' : 'hover:bg-gray-800'}`}>
+                                        {obj.name}
                                     </div>
                                 )) : <div className="text-xs text-gray-500 italic p-2.5">No objects on this floor.</div>}
                             </div>
