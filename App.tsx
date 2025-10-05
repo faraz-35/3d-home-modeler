@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Canvas, type ThreeElements, useThree } from '@react-three/fiber';
 import { OrbitControls, Grid, Box, Plane, Select } from '@react-three/drei';
 import * as THREE from 'three';
@@ -60,6 +60,8 @@ const ShelfIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w
 const DeleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
 const UndoIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 15l-3-3m0 0l3-3m-3 3h8a5 5 0 000-10H9" /></svg>;
 const RedoIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 15l3-3m0 0l-3-3m3 3H8a5 5 0 000 10h3" /></svg>;
+const CollapseIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>;
+const ExpandIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>;
 
 
 // --- 3D OBJECT COMPONENTS ---
@@ -433,7 +435,11 @@ const PropertiesPanel: React.FC = () => (
 );
 
 
-const ItemsPanel: React.FC<{ onFileLoad: (e: React.ChangeEvent<HTMLInputElement>) => void }> = ({ onFileLoad }) => {
+const ItemsPanel: React.FC<{
+    onFileLoad: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    isCollapsed: boolean;
+    onToggleCollapse: () => void;
+}> = ({ onFileLoad, isCollapsed, onToggleCollapse }) => {
     const { 
         addObject, addFloor, deleteFloor, floors, currentFloorIndex, setCurrentFloorIndex, 
         objects, selectedObjectId, setSelectedObjectId, sceneBackgroundColor, setSceneBackgroundColor,
@@ -470,56 +476,64 @@ const ItemsPanel: React.FC<{ onFileLoad: (e: React.ChangeEvent<HTMLInputElement>
     };
     
     return (
-        <div className="w-80 h-full bg-gray-900 text-white shadow-lg flex flex-col">
+        <div className={`h-full bg-gray-900 text-white shadow-lg flex flex-col transition-all duration-300 ease-in-out ${isCollapsed ? 'w-64' : 'w-80'}`}>
             <input type="file" ref={fileInputRef} onChange={onFileLoad} accept=".homemodeler" style={{ display: 'none' }} />
-            <div className="p-4 border-b border-gray-700 h-20 flex items-center"><h1 className="text-xl font-bold tracking-wider">3D Home Modeler</h1></div>
+            
+            <div className="p-4 border-b border-gray-700 h-20 flex items-center justify-between shrink-0">
+                {!isCollapsed && <h1 className="text-xl font-bold tracking-wider">3D Home Modeler</h1>}
+                <button onClick={onToggleCollapse} title={isCollapsed ? "Expand Menu" : "Collapse Menu"} className="p-2 rounded-lg text-gray-300 hover:bg-gray-700 transition-colors">
+                    {isCollapsed ? <ExpandIcon/> : <CollapseIcon/>}
+                </button>
+            </div>
 
             <div className="flex-grow overflow-y-auto">
-                <Section title="File">
-                    <div className="grid grid-cols-2 gap-4">
-                        <IconButton onClick={handleSave} label="Save"><SaveIcon /></IconButton>
-                        <IconButton onClick={handleLoadClick} label="Load"><LoadIcon /></IconButton>
-                    </div>
-                </Section>
-                
-                <Section title="Edit">
-                    <div className="grid grid-cols-2 gap-4">
-                        <IconButton onClick={undo} label="Undo" isDisabled={past.length === 0}><UndoIcon /></IconButton>
-                        <IconButton onClick={redo} label="Redo" isDisabled={future.length === 0}><RedoIcon /></IconButton>
-                    </div>
-                </Section>
+                <div className={isCollapsed ? 'hidden' : ''}>
+                    <Section title="File">
+                        <div className="grid grid-cols-2 gap-4">
+                            <IconButton onClick={handleSave} label="Save"><SaveIcon /></IconButton>
+                            <IconButton onClick={handleLoadClick} label="Load"><LoadIcon /></IconButton>
+                        </div>
+                    </Section>
+                    
+                    <Section title="Edit">
+                        <div className="grid grid-cols-2 gap-4">
+                            <IconButton onClick={undo} label="Undo" isDisabled={past.length === 0}><UndoIcon /></IconButton>
+                            <IconButton onClick={redo} label="Redo" isDisabled={future.length === 0}><RedoIcon /></IconButton>
+                        </div>
+                    </Section>
 
-                <Section title="Architecture">
-                    <div className="grid grid-cols-3 gap-4">
-                        <IconButton onClick={() => addObject(ObjectType.Wall)} label="Wall"><WallIcon /></IconButton>
-                        <IconButton onClick={() => addObject(ObjectType.Door)} label="Door"><DoorIcon /></IconButton>
-                        <IconButton onClick={() => addObject(ObjectType.Window)} label="Window"><WindowIcon /></IconButton>
-                    </div>
-                </Section>
+                    <Section title="Architecture">
+                        <div className="grid grid-cols-3 gap-4">
+                            <IconButton onClick={() => addObject(ObjectType.Wall)} label="Wall"><WallIcon /></IconButton>
+                            <IconButton onClick={() => addObject(ObjectType.Door)} label="Door"><DoorIcon /></IconButton>
+                            <IconButton onClick={() => addObject(ObjectType.Window)} label="Window"><WindowIcon /></IconButton>
+                        </div>
+                    </Section>
 
-                <Section title="Furniture">
-                    <div className="grid grid-cols-3 gap-4">
-                        <IconButton onClick={() => addObject(ObjectType.Table)} label="Table"><TableIcon /></IconButton>
-                        <IconButton onClick={() => addObject(ObjectType.Chair)} label="Chair"><ChairIcon /></IconButton>
-                        <IconButton onClick={() => addObject(ObjectType.Sofa)} label="Sofa"><SofaIcon /></IconButton>
-                        <IconButton onClick={() => addObject(ObjectType.Bed)} label="Bed"><BedIcon /></IconButton>
-                        <IconButton onClick={() => addObject(ObjectType.Shelf)} label="Shelf"><ShelfIcon /></IconButton>
-                    </div>
-                </Section>
+                    <Section title="Furniture">
+                        <div className="grid grid-cols-3 gap-4">
+                            <IconButton onClick={() => addObject(ObjectType.Table)} label="Table"><TableIcon /></IconButton>
+                            <IconButton onClick={() => addObject(ObjectType.Chair)} label="Chair"><ChairIcon /></IconButton>
+                            <IconButton onClick={() => addObject(ObjectType.Sofa)} label="Sofa"><SofaIcon /></IconButton>
+                            <IconButton onClick={() => addObject(ObjectType.Bed)} label="Bed"><BedIcon /></IconButton>
+                            <IconButton onClick={() => addObject(ObjectType.Shelf)} label="Shelf"><ShelfIcon /></IconButton>
+                        </div>
+                    </Section>
 
-                <Section title="Floors">
-                     <div className="flex gap-3 items-center">
-                        <select value={currentFloorIndex} onChange={(e) => setCurrentFloorIndex(parseInt(e.target.value))} className="flex-grow bg-gray-700 border border-gray-600 rounded-md px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                          {floors.map((floor, index) => ( <option key={index} value={index}>{floor.name}</option>))}
-                        </select>
-                        <IconButton onClick={addFloor} label="Add"><AddFloorIcon /></IconButton>
-                        <IconButton onClick={handleDeleteFloor} label="Delete" isDisabled={floors.length <= 1}><DeleteIcon /></IconButton>
-                     </div>
-                </Section>
+                    <Section title="Floors">
+                         <div className="flex gap-3 items-center">
+                            <select value={currentFloorIndex} onChange={(e) => setCurrentFloorIndex(parseInt(e.target.value))} className="flex-grow bg-gray-700 border border-gray-600 rounded-md px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                              {floors.map((floor, index) => ( <option key={index} value={index}>{floor.name}</option>))}
+                            </select>
+                            <IconButton onClick={addFloor} label="Add"><AddFloorIcon /></IconButton>
+                            <IconButton onClick={handleDeleteFloor} label="Delete" isDisabled={floors.length <= 1}><DeleteIcon /></IconButton>
+                         </div>
+                    </Section>
 
-                <Section title="Settings">
-                    <ColorInput label="Background" value={sceneBackgroundColor} onChange={setSceneBackgroundColor}/>
-                </Section>
+                    <Section title="Settings">
+                        <ColorInput label="Background" value={sceneBackgroundColor} onChange={setSceneBackgroundColor}/>
+                    </Section>
+                </div>
                 
                 <div className="px-4 py-5 space-y-2">
                     <h2 className="text-xs font-bold uppercase text-gray-500 mb-3 tracking-widest">Scene Items</h2>
@@ -617,8 +631,12 @@ const ControlsHelpText: React.FC = () => {
 };
 
 export default function App() {
+  const [isLeftMenuCollapsed, setIsLeftMenuCollapsed] = useState(false);
   const { setSelectedObjectId, selectedObjectId, loadState } = useStore();
   const showPropertiesPanel = !!selectedObjectId;
+  
+  const leftPanelWidth = isLeftMenuCollapsed ? '16rem' : '20rem'; // w-64 vs w-80
+  const rightPanelWidth = showPropertiesPanel ? '20rem' : '0rem'; // w-80 vs w-0
 
   const handleFileLoad = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -643,19 +661,35 @@ export default function App() {
 
   return (
     <div className="w-screen h-screen relative overflow-hidden bg-gray-800">
-        <div className="absolute top-0 left-0 h-full flex z-10 pointer-events-none">
-            <div className="pointer-events-auto"><ItemsPanel onFileLoad={handleFileLoad} /></div>
-            <div className={`pointer-events-auto transition-all duration-300 ease-in-out overflow-hidden ${showPropertiesPanel ? 'w-80' : 'w-0'}`}>
+        {/* Left Panel */}
+        <div className="absolute top-0 left-0 h-full z-10 pointer-events-none">
+            <div className="pointer-events-auto h-full">
+                <ItemsPanel 
+                    onFileLoad={handleFileLoad}
+                    isCollapsed={isLeftMenuCollapsed}
+                    onToggleCollapse={() => setIsLeftMenuCollapsed(!isLeftMenuCollapsed)}
+                />
+            </div>
+        </div>
+        
+        {/* Right Panel */}
+        <div className="absolute top-0 right-0 h-full z-10 pointer-events-none">
+             <div className={`pointer-events-auto transition-all duration-300 ease-in-out overflow-hidden ${showPropertiesPanel ? 'w-80' : 'w-0'}`}>
                 <PropertiesPanel />
             </div>
         </div>
-      
-      <main className="absolute top-0 bottom-0 right-0 transition-all duration-300 ease-in-out" style={{ left: showPropertiesPanel ? '40rem' : '20rem' }} onClick={() => setSelectedObjectId(null)}>
-        <Canvas camera={{ position: [25, 25, 25], fov: 50 }} shadows>
-            <SceneContent />
-        </Canvas>
-      </main>
-      <ControlsHelpText />
+
+        {/* Main Canvas */}
+        <main 
+            className="absolute top-0 bottom-0 transition-all duration-300 ease-in-out" 
+            style={{ left: leftPanelWidth, right: rightPanelWidth }}
+            onClick={() => setSelectedObjectId(null)}
+        >
+            <Canvas camera={{ position: [25, 25, 25], fov: 50 }} shadows>
+                <SceneContent />
+            </Canvas>
+        </main>
+        <ControlsHelpText />
     </div>
   );
 }
