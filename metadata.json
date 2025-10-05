@@ -1,0 +1,5 @@
+{
+  "name": "3D Home Modeler",
+  "description": "A simple and interactive 3D home modeler application. Add walls, doors, and windows, customize their dimensions and colors, and build multi-story designs with an intuitive interface.",
+  "requestFramePermissions": []
+}
